@@ -156,7 +156,7 @@ class LeagueClient(object):
         while True:
             for p in psutil.process_iter(attrs=['exe']):
                 if p.info['exe'] != None and p.info['exe'].endswith(LEAGUE_GAME_NAME): # Find the game process, if it exists, we can continue the program
-                    break
+                    return #Instant leave nested loops
 
             time.sleep(5)
             
