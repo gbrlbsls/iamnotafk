@@ -154,9 +154,14 @@ class LeagueClient(object):
 
     def wait_game(self):
         while True:
+		    has_game_process = False # League game process found
             for p in psutil.process_iter(attrs=['exe']):
-                if p.info['exe'] != None and p.info['exe'].endswith(LEAGUE_GAME_NAME): # Find the game process, if it exists, we can continue the program
-                    return #Instant leave nested loops
+			    pname = p.info['exe']
+                if pname != None and pname.endswith(LEAGUE_GAME_NAME): # Find the game process, if it exists, we can continue the program
+                    has_game_process = True
+			
+		    if not has_game_process:
+		        break
 
             time.sleep(5)
             
@@ -197,3 +202,4 @@ def main():
         time.sleep(sleep_time)
 
 main()
+
