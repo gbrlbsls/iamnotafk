@@ -157,7 +157,7 @@ class LeagueClient(object):
 		    has_game_process = False # League game process found
             for p in psutil.process_iter(attrs=['exe']):
 			    pname = p.info['exe']
-                if pname != None and pname.endswith(LEAGUE_GAME_NAME): # Find the game process, if it exists, we can continue the program
+                if pname != None and pname.endswith(LEAGUE_GAME_NAME): # Find the game process, if it doesn't exists, we can continue the program
                     has_game_process = True
 			
 		    if not has_game_process:
