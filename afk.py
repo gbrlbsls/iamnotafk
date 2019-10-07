@@ -1,8 +1,9 @@
 import os
 import time
-import psutil
+import datetime as dt
 import re
 
+import psutil
 import win32gui
 import pyautogui
 
@@ -137,20 +138,21 @@ class LeagueClient(object):
     def log(self, p_phase):
         #['Lobby', 'Matchmaking', 'ReadyCheck', 'ChampSelect', 'GameStart', 'PostGame', 'ReadyCheckAccepted']
         if p_phase != self.phase:
+            now = dt.datetime.now().strftime("%H:%M:%S")
             if self.phase == 'Matchmaking':
-                print('>', 'Queue started')
+                print(now, '> Queue started')
             elif self.phase == 'ReadyCheck':
-                print('>', 'Match found')
+                print(now, '> Match found')
             elif self.phase == 'ReadyCheckAccepted':
-                print('>', 'Match accepted')
+                print(now, '> Match accepted')
             elif self.phase == 'ChampSelect':
-                print('>', 'Picks and bans')
+                print(now, '> Picks and bans')
             elif self.phase == 'GameStart':
-                print('>', 'Game started')
+                print(now, '> Game started')
             elif self.phase == 'PostGame':
-                print('>', 'Game finished')
+                print(now, '> Game finished')
             else:
-                print('>', self.phase)
+                print(now, '> ' + self.phase)
 
     def wait_game(self):
         while True:
@@ -185,15 +187,15 @@ class LeagueClient(object):
 
 def main():
     sleep_time = 1
-    print(":> I am not afk!")
+    print(dt.datetime.now().strftime("%H:%M:%S"),"> I am not afk!")
     league_client = LeagueClient()
     if league_client.process == None:
-        print(":< Because the client isn't running...")
+        print(dt.datetime.now().strftime("%H:%M:%S"), "< Because the client isn't running...")
         return None
     while league_client.process != None: # Keep running until the client is closed
         league_client.update()
         if league_client.phase == 'GameStart': # Check if the game was started
-            print('>', 'Waiting game end...')
+            print(dt.datetime.now().strftime("%H:%M:%S"), '> Waiting game end...')
             league_client.wait_game() # Wait it finishes, reducing cpu consumption
         elif league_client.phase == 'Matchmaking':
             sleep_time = 0.5 # When in the queue, check faster for changes
