@@ -1,5 +1,5 @@
 # iamnotafk
-Python script that accepts League of Leagends matches, so we can drink water, eat fruits and respect our parents without losing PDL!
+Python script that accepts League of Leagends matches, so we can drink water, eat fruits and respect our parents without losing LP!
 
 # Requirements
   Python==3.7.4  
