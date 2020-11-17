@@ -1,208 +1,101 @@
-import os
 import time
-import datetime as dt
-import re
+import pygetwindow as gw
+import ctypes  
+from discord import DiscordBot
 
-import psutil
-import win32gui
-import pyautogui
+from league_game import LeagueGame
+from league_client import LeagueClient
+from config import Config
+from util import pretty_print, pretty_log
+from const import *
 
-LEAGUE_WINDOW_TITLE = 'League of Legends'
-LEAGUE_PROCESS_NAME = 'LeagueClient.exe'
-LEAGUE_GAME_NAME = 'League of Legends.exe'
-LEAGUE_PHASES = ['Lobby', 'Matchmaking', 'ReadyCheck', 'ChampSelect', 'GameStart', 'PostGame', 'ReadyCheckAccepted']
+WINDOW_TITLE = 'iamnotafk (' + str(time.time()) + ')'
 
-class LeagueClient(object):
-    def __init__(self):
-        self.hwnd = None
-        self.x = 0
-        self.y = 0
-        self.w = 0
-        self.h = 0
+def focus_program():
+    w = gw.getWindowsWithTitle(WINDOW_TITLE)
+    if len(w) < 1:
+        return
+    
+    w = w[0]
+    if not w.isMinimized:
+        w.minimize()
 
-        self.phase = None
-
-        self.process = None
-        self.logname = None
-
-        # log attrs
-        self._last_size = 0
-        self._last_str = ''
-        self._file_index = 0
-
-        self.update()
-
-    def focus(self):
-        try:
-            if win32gui.IsIconic(self.hwnd):
-                win32gui.ShowWindow(self.hwnd, 9)
-                return False
-
-            win32gui.SetForegroundWindow(self.hwnd)
-            win32gui.SetActiveWindow(self.hwnd)
-        except:
-            pass
-        
-        return self._is_focused()
-
-    def _is_focused(self):
-        return (win32gui.GetForegroundWindow() == self.hwnd) and (win32gui.IsWindowVisible(self.hwnd) == 1)
-
-    def _get_window(self):
-        self.hwnd = win32gui.FindWindow(None, LEAGUE_WINDOW_TITLE)
-        if self.hwnd <= 0:
-            self.hwnd = None
-
-    def _get_window_info(self):
-        if self.hwnd == None:
-            return
-        
-        rect = win32gui.GetWindowRect(self.hwnd)
-        self.x = rect[0]
-        self.y = rect[1]
-        self.w = rect[2] - self.x
-        self.h = rect[3] - self.y
-
-    def _get_process(self):
-        self.process = None
-        for p in psutil.process_iter(attrs=['exe']):
-            if p.info['exe'] != None and p.info['exe'].endswith(LEAGUE_PROCESS_NAME):
-                self.process = p
-
-    def _get_logname(self):
-        if self.process == None:
-            self.logname = None
-            return None
-
-        try:
-            # this returns the list of opened files by the current process
-            flist = self.process.open_files()
-            if flist:
-                for nt in flist:
-                    if nt.path.endswith('LeagueClient.log'):
-                        self.logname = nt.path
-
-        # This catches a race condition where a process ends
-        # before we can examine its files
-        except psutil.NoSuchProcess:
-            self.logname = None
-
-    def _update_log(self):
-        if self.process == None:
-            return False
-
-        with open(self.logname) as f:
-            f.seek(self._file_index)
-            self._last_str = f.read(self._last_size - self._file_index)
-            self._file_index = self._last_size
-        
-        return True
-
-    def _log_has_changed(self):
-        if self.logname == None:
-            return False
-
-        fsize = os.stat(self.logname).st_size
-        if fsize != self._last_size:
-            self._last_size = fsize
-            self._update_log()
-            return True
-
-        return False
-
-    def _parse_log(self):
-        lines = self._last_str.splitlines()
-
-        for lineNumber in reversed(range(len(lines))):
-            line = lines[lineNumber]
-            phase = re.search(r'Gameflow: entering state \'(\w+)\'', line)
-            if phase != None:
-                phase = phase.group(1)
-                if (self.phase != phase) and LEAGUE_PHASES.count(phase) > 0:
-                    self.phase = phase
-                    break
-            elif 'READY_CHECK_USER_ACCEPTED' in line:
-                self.phase = 'ReadyCheckAccepted'
-                break
-
-    def _accept_match(self):
-        button_x = self.x + (self.w * 0.511)
-        button_y = self.y + (self.h * 0.765)
-
-        pyautogui.click(x=button_x, y=button_y) 
-
-    def try_accept_match(self):
-        if(self.focus()):
-            self._accept_match()
-
-    def log(self, p_phase):
-        #['Lobby', 'Matchmaking', 'ReadyCheck', 'ChampSelect', 'GameStart', 'PostGame', 'ReadyCheckAccepted']
-        if p_phase != self.phase:
-            now = dt.datetime.now().strftime("%H:%M:%S")
-            if self.phase == 'Matchmaking':
-                print(now, '> Queue started')
-            elif self.phase == 'ReadyCheck':
-                print(now, '> Match found')
-            elif self.phase == 'ReadyCheckAccepted':
-                print(now, '> Match accepted')
-            elif self.phase == 'ChampSelect':
-                print(now, '> Picks and bans')
-            elif self.phase == 'GameStart':
-                print(now, '> Game started')
-            elif self.phase == 'PostGame':
-                print(now, '> Game finished')
-            else:
-                print(now, '> ' + self.phase)
-
-    def wait_game(self):
-        while True:
-            has_game_process = False #League game process found
-            for p in psutil.process_iter(attrs=['exe']):
-                pname = p.info['exe']
-                if pname != None and pname.endswith(LEAGUE_GAME_NAME): #Find the game process, if it exists, we can continue the program
-                    has_game_process = True
-                    break
-			    
-            if not has_game_process:
-                break
-
-            time.sleep(5)
-            
-                
-
-    def update(self):
-        self._get_process()
-        self._get_logname()
-
-        p_phase = self.phase
-        if self._log_has_changed():
-            self._parse_log()
-        
-        if self.phase == 'ReadyCheck':
-            self._get_window()
-            self._get_window_info()
-            self.try_accept_match()
-        
-        self.log(p_phase)
+    w.restore()
+    w.activate()   
 
 def main():
     sleep_time = 1
-    print(dt.datetime.now().strftime("%H:%M:%S"),"> I am not afk!")
-    league_client = LeagueClient()
-    if league_client.process == None:
-        print(dt.datetime.now().strftime("%H:%M:%S"), "< Because the client isn't running...")
-        return None
-    while league_client.process != None: # Keep running until the client is closed
-        league_client.update()
-        if league_client.phase == 'GameStart': # Check if the game was started
-            print(dt.datetime.now().strftime("%H:%M:%S"), '> Waiting game end...')
-            league_client.wait_game() # Wait it finishes, reducing cpu consumption
-        elif league_client.phase == 'Matchmaking':
-            sleep_time = 0.5 # When in the queue, check faster for changes
-        else:
-            sleep_time = 1 # else, we can slow down
 
+    ctypes.windll.kernel32.SetConsoleTitleW(WINDOW_TITLE)  
+    pretty_log("I Am Not Afk!")
+
+    config = Config()
+    
+    print(('\t' + '\n\t'.join(config.printable(True).split('\n'))).expandtabs(11))
+   
+    discord_bot = DiscordBot(config.get_str_value('DISCORD_WEBHOOK') + config.get_str_value('DISCORD_WEBHOOK_PARAMS'))
+    
+    league_client = LeagueClient()
+    league_game = LeagueGame()
+
+    first_loop = True
+    while True: # Keep running until the client is closed
+        league_client.update()
+        league_game.update()
+        if league_client.exists():
+            if league_client.in_phase(LEAGUE_PHASE.QUEUE):
+                sleep_time = 0.5 # When in the queue, check faster for changes
+            else:
+                sleep_time = 1 # else, we can slow down
+
+                if league_client.in_phase(LEAGUE_PHASE.MATCHFOUND):
+                    league_client.try_accept_match() 
+
+                if league_client.isnt_same_phase():
+                    if config.get_bool_value('GAME_PHASES_ALERT_DISCORD') and discord_bot.ok:
+                        message = None
+                        if league_client.in_phase(LEAGUE_PHASE.PICKSANDBANS):
+                            message = ', estamos na seleção de campeões!'
+                        elif league_client.in_phase(LEAGUE_PHASE.BAN_TURN):
+                            message = ', é sua vez de banir um campeão!'
+                        elif league_client.in_phase(LEAGUE_PHASE.PICK_TURN):
+                            message = ', selecione seu campeão!'
+                        
+                        if message:
+                            message = (config.get_mention_value('DISCORD_MENTION') or 'Hey') + message
+                            discord_bot.send_message(
+                                message=message
+                            )
+        
+        if league_game.exists():
+            if league_game.has_started():
+
+                if config.get_bool_value('GAME_PHASES_ALERT_DISCORD') and discord_bot.ok:
+                    discord_bot.send_message(
+                        message=(config.get_mention_value('DISCORD_MENTION') or 'Hey') + ', a partida iniciou!',
+                    )
+                    
+                if config.get_value('GAME_START_ALERT_BEEP') > 0:
+                    print('\a' * config.get_value('GAME_START_ALERT_BEEP'), end='')
+                if config.get_value('GAME_START_ALERT_TEXT') == 1:
+                    if not league_game.is_focused():
+                        focus_program()
+                    ctypes.windll.user32.MessageBoxW(0, "The game was started!", "I Am Not Afk", 48)
+                
+                if config.get_value('GAME_START_CLOSE') == 1:
+                    break
+                else:
+                    pretty_log('Waiting game end...')
+                    league_game.wait_game_end() # Wait it finishes, reducing cpu consumption
+        
+        if first_loop:
+            if not league_client.exists() and not league_game.exists():
+                pretty_log('League Client not found. Searching...')
+            first_loop = False
         time.sleep(sleep_time)
 
-main()
+try:
+    main()
+except KeyboardInterrupt:
+    pretty_log('Tchau!')
 
