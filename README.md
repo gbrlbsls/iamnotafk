@@ -1,49 +1,49 @@
 # iamnotafk
-  A python script that accepts league of legends matchs automatically and notifies with beeps, messages on the screen and discord messages!
+&nbsp;&nbsp;A python script that accepts league of legends matchs automatically and notifies with beeps, messages on the screen and discord messages!
 
 # Requirements
-  Python==3.8.6 
-  PyAutoGUI==0.9.47
-  PyGetWindow==0.0.9
-  requests==2.24.0 
+&nbsp;&nbsp;Python==3.8.6 
+&nbsp;&nbsp;PyAutoGUI==0.9.47
+&nbsp;&nbsp;PyGetWindow==0.0.9
+&nbsp;&nbsp;requests==2.24.0 
 
 # Installing
-  git clone git://github.com/gbrlbsls/iamnotafk.git
+&nbsp;&nbsp;git clone git://github.com/gbrlbsls/iamnotafk.git
 
 # Configuring
-  There is a config.ini file that contains some configurations:
-  
-  GAME_START_CLOSE
-    Close program when the game starts (can be better on potatos computers like mine)
-    
-  GAME_START_ALERT_BEEP
-    Alert game start with some beeps (the value is the number of beeps)
-    
-  GAME_START_ALERT_TEXT
-    Show a message box alerting that the game was started (useful if you want to watch something while the game is loading)
-   
-  DISCORD_WEBHOOK
-    Set the webhook url (See how to create one https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
-    
-  GAME_PHASES_ALERT_DISCORD
-    Send a message on discord with the game phase(like picks and bans, pick turn, ban turn, game start) | Needs webhook
-   
-  DISCORD_MENTION
-    Use a different name on discord messages (like "Sir, the game was started!" instead of "Hey, the game was started!")
-  
-  DISCORD_WEBHOOK_PARAMS
-    Set some webhook params (See more here https://discord.com/developers/docs/resources/webhook)
-  
+&nbsp;&nbsp;There is a config.ini file that contains some configurations:
+&nbsp;&nbsp;
+&nbsp;&nbsp;GAME_START_CLOSE
+&nbsp;&nbsp;&nbsp;&nbsp;Close program when the game starts (can be better on potatos computers like mine)
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;GAME_START_ALERT_BEEP
+&nbsp;&nbsp;&nbsp;&nbsp;Alert game start with some beeps (the value is the number of beeps)
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;GAME_START_ALERT_TEXT
+&nbsp;&nbsp;&nbsp;&nbsp;Show a message box alerting that the game was started (useful if you want to watch something while the game is loading)
+&nbsp;&nbsp; 
+&nbsp;&nbsp;DISCORD_WEBHOOK
+&nbsp;&nbsp;&nbsp;&nbsp;Set the webhook url ( [How to create one](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks) )
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;GAME_PHASES_ALERT_DISCORD
+&nbsp;&nbsp;&nbsp;&nbsp;Send a message on discord with the game phase(like picks and bans, pick turn, ban turn, game start) | Needs webhook
+&nbsp;&nbsp; 
+&nbsp;&nbsp;DISCORD_MENTION
+&nbsp;&nbsp;&nbsp;&nbsp;Use a different name on discord messages (like "Sir, the game was started!" instead of "Hey, the game was started!")
+&nbsp;&nbsp;
+&nbsp;&nbsp;DISCORD_WEBHOOK_PARAMS
+&nbsp;&nbsp;&nbsp;&nbsp;Set some webhook params ( [See more here](https://discord.com/developers/docs/resources/webhook) )
+&nbsp;&nbsp;
 # How i use?
-  1. I created a discord server
-  2. I created a webhook
-  3. I put the webhook and my nick in the config.ini
-  4. I start the script and walk to my kitchen to get some snacks
-  
+&nbsp;&nbsp;1. I created a discord server
+&nbsp;&nbsp;2. I created a webhook
+&nbsp;&nbsp;3. I put the webhook and my nick in the config.ini
+&nbsp;&nbsp;4. I start the script and walk to my kitchen to get some snacks
+&nbsp;&nbsp;
 # How the program works?
-  The program reads the league client logs and game logs to see if some match was found, the game was started or where we are in the phases(picks and bans, queue, out of queue, accepting match, in game). When some match is found, click on the 'Accept match' button. (The program doesn't find the button on screen, just click on it by a relative position multiplier, if that exists).
-  
-  I've tested only in windows 7 32 bits.
-  
+&nbsp;&nbsp;The program reads the league client logs and game logs to see if some match was found, the game was started or where we are in the phases(picks and bans, queue, out of queue, accepting match, in game). When some match is found, click on the 'Accept match' button. (The program doesn't find the button on screen, just click on it by a relative position multiplier, if that exists).
+&nbsp;&nbsp;
+&nbsp;&nbsp;I've tested only in windows 7 32 bits.
+&nbsp;&nbsp;
 # Running
-    python afk.py
+&nbsp;&nbsp;&nbsp;&nbsp;python afk.py
